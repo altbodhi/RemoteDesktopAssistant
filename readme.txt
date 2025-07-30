@@ -17,9 +17,10 @@ build instruction:
     5. after build if bin\release\net9.0-windows you find exe-file
     6. start it and enjoy!
 
-example: if you have pc1 and every time rdp reques password
-when 
-1. add record from Servers menu
+example: 
+if you have pc1 
+and every time rdp request password when 
+1. add record pc1 from Servers menu
 2. add entry to hosts (some host alias as added in 1 and real ip)
 3. add login via cmdkey from main menu
 4. test as Servers/Connect
