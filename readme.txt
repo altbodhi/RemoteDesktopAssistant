@@ -20,8 +20,9 @@ build instruction:
 example: 
 if you have pc1 
 and every time rdp request password when 
-1. add record pc1 from Servers menu
-2. add entry to hosts (some host alias as added in 1 and real ip)
-3. add login via cmdkey from main menu
-4. test as Servers/Connect
+    1. add record pc1 from Servers menu
+    2. optional add entry to hosts (some host alias as added in 1 and real ip) 
+    if host ip or host name diff from dns 
+    3. add login via cmdkey from main menu
+    4. test menu item Servers/Connect
 
