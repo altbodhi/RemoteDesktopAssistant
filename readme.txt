@@ -26,3 +26,4 @@ and every time rdp request password when
     3. add login via cmdkey from main menu
     4. test menu item Servers/Connect
 
+hint: rdp toggle fullscrean hostkeys CTRL+ALT+BREAK
