@@ -9,3 +9,11 @@ This program allows you to define network aliases for hosts and communication wi
 and provides a maximally convenient way to save credentials and settings
 local dns records (% windir %/system32/drivers/etc/hosts)
 
+build instruction:
+    1. check installed NET SDK 9
+    2. clone this repo
+    3. open console in repo folder
+    4. run `dotnet build -c release`
+    5. after build if bin\release\net9.0-windows you find exe-file
+    6. start it and enjoy!
+
