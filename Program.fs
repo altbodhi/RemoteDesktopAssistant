@@ -53,6 +53,11 @@ let purgeCmdKey = cmdKeys.DropDownItems.Add("&Purge")
 let addCmdKey = cmdKeys.DropDownItems.Add("&Add")
 
 openHosts.Click.Add(fun _ -> Utils.viewHosts ())
+let mutable hostEntries = Hosts.readHostEntries ()
+
+let chekHost host =
+    hostEntries |> Array.exists (fun h -> h.host = host.host)
+
 changeHosts.Click.Add(fun _ -> Utils.changeHosts ())
 
 type MainMenu() as x =
@@ -62,9 +67,9 @@ type MainMenu() as x =
         do
             x.Dock <- DockStyle.Top
             x.LayoutStyle <- ToolStripLayoutStyle.Flow
-            x.Items.Add(servers) |> ignore
-            x.Items.Add(hosts) |> ignore
-            x.Items.Add(cmdKeys) |> ignore
+            x.Items.Add servers |> ignore
+            x.Items.Add hosts |> ignore
+            x.Items.Add cmdKeys |> ignore
     end
 
 type ConnectionsGrid() as x =
@@ -75,7 +80,6 @@ type ConnectionsGrid() as x =
             x.DataSource <- db
             x.AllowUserToAddRows <- false
             x.AllowUserToDeleteRows <- false
-            let hosts = Hosts.readHostEntries ()
 
             x.CellFormatting.Add(fun e ->
                 if e.RowIndex > x.Rows.Count then
@@ -84,7 +88,7 @@ type ConnectionsGrid() as x =
                     match x.Rows.Item(e.RowIndex).DataBoundItem with
                     | :? DataRowView as item ->
                         let host = item.Row |> dataRowToRemoteHost
-                        let is_new = hosts |> Array.exists (fun h -> h.host = host.host) |> not
+                        let is_new = (chekHost >> not) host
 
                         if is_new then
                             e.CellStyle.BackColor <- System.Drawing.Color.LightYellow
@@ -93,6 +97,12 @@ type ConnectionsGrid() as x =
 
 let panel = new FlowLayoutPanel()
 let grid = new ConnectionsGrid()
+
+let watch =
+    FileWatch.watchHosts (fun e ->
+        System.Diagnostics.Debug.WriteLine $"{e.ChangeType} -> {e.FullPath}"
+        hostEntries <- Hosts.readHostEntries ()
+        grid.Invalidate())
 
 type AccountEdit(host) as x =
     class
@@ -149,19 +159,19 @@ type ConnectionEdit() as x =
 
 
             flow.Controls.Add(new Label(Text = "Name:"))
-            flow.Controls.Add(name)
+            flow.Controls.Add name
             flow.Controls.Add(new Label(Text = "Host:"))
-            flow.Controls.Add(host)
+            flow.Controls.Add host
             flow.Controls.Add(new Label(Text = "Port:"))
-            flow.Controls.Add(port)
+            flow.Controls.Add port
             let panel = new FlowLayoutPanel()
             panel.WrapContents <- false
             panel.FlowDirection <- FlowDirection.RightToLeft
             panel.Dock <- DockStyle.Fill
             panel.BackColor <- System.Drawing.Color.Red
-            panel.Controls.Add(accept)
-            panel.Controls.Add(cancel)
-            flow.Controls.Add(panel)
+            panel.Controls.Add accept
+            panel.Controls.Add cancel
+            flow.Controls.Add panel
             cancel.Anchor <- AnchorStyles.Right
             accept.Anchor <- AnchorStyles.Right
 
@@ -179,9 +189,9 @@ type ConnectionEdit() as x =
 
         member x.Port
             with get () =
-                (match System.UInt16.TryParse(port.Text) with
-                 | (true, v) -> v
-                 | _ -> 0us)
+                match System.UInt16.TryParse(port.Text) with
+                | true, v -> v
+                | _ -> 0us
             and set (value: uint16) = port.Text <- $"{value}"
 
         member x.Edit() = x.ShowDialog() = DialogResult.OK
@@ -208,7 +218,7 @@ deleteServers.Click.Add(fun _ ->
     | Some r ->
         let h = dataRowToRemoteHost r
 
-        if question $"Удалить {h.name} ({h.host})?" then
+        if question $"Delete {h.name} ({h.host})?" then
             db.Rows.Remove r
             grid.Refresh())
 
@@ -228,9 +238,9 @@ purgeCmdKey.Click.Add(fun _ ->
     | Some v ->
         v
         |> dataRowToRemoteHost
-        |> (fun x ->
-            if question $"Удалить учетные данные хоста {x.name}?" then
-                (Utils.deleteCmdKey x.host) |> ignore))
+        |> fun x ->
+            if question $"Delete account for this host {x.name}?" then
+                Utils.deleteCmdKey x.host |> ignore)
 
 grid.Dock <- DockStyle.Fill
 panel.Controls.Add grid
@@ -260,21 +270,20 @@ addCmdKey.Click.Add(fun _ ->
     | Some v ->
         v
         |> dataRowToRemoteHost
-        |> (fun x ->
+        |> fun x ->
             use acc = new AccountEdit(x.host)
 
             if acc.Edit() then
-                (Utils.addCmdKey x.host acc.User acc.Pass) |> ignore))
+                Utils.addCmdKey x.host acc.User acc.Pass |> ignore)
 
 addServers.Click.Add(fun e ->
     use connectionEdit = new ConnectionEdit()
 
     if connectionEdit.Edit() then
-        db.Rows.Add(
+        db.Rows.Add
             [| connectionEdit.Name :> obj
                connectionEdit.Host :> obj
                connectionEdit.Port :> obj |]
-        )
         |> ignore
 
         grid.Refresh())
@@ -290,13 +299,16 @@ editServers.Click.Add(fun e ->
 
         if edit.Edit() then
             dr.BeginEdit()
-            dr.Item("Name") <- edit.Name
-            dr.Item("Host") <- edit.Host
-            dr.Item("Port") <- edit.Port
+            dr.Item "Name" <- edit.Name
+            dr.Item "Host" <- edit.Host
+            dr.Item "Port" <- edit.Port
             dr.EndEdit()
             grid.Refresh())
 
-
-Application.Run mainForm
-
-db.WriteXml "db.xml"
+[<System.STAThreadAttribute>]
+[<EntryPoint>]
+let main args =
+    Application.Run mainForm
+    watch.Dispose()
+    db.WriteXml "db.xml"
+    0

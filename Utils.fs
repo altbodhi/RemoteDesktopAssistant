@@ -77,3 +77,20 @@ module Utils =
                 select e
         }
         |> Seq.toList
+
+module FileWatch =
+    let watchHosts cb =
+        let fi = FileInfo Hosts.winHosts
+
+        match fi.DirectoryName with
+        | null -> failwith $"{Hosts.winHosts} not found"
+        | dir ->
+            let fsw = new FileSystemWatcher(dir)
+            fsw.Filter <- fi.Name
+
+            fsw.Changed
+            |> Event.filter (fun x -> x.ChangeType = WatcherChangeTypes.Changed)
+            |> Event.add cb
+
+            fsw.EnableRaisingEvents <- true
+            fsw :> System.IDisposable
