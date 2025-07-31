@@ -37,20 +37,20 @@ else
     db.Rows.Add([| "Домашний компьютер" :> obj; "home-pc" :> obj; 3389us :> obj |])
     |> ignore
 
-let servers = new ToolStripMenuItem("&Server")
-let addServers = servers.DropDownItems.Add("&Add")
+let servers = new ToolStripMenuItem "&Server"
+let addServers = servers.DropDownItems.Add "&Add"
 
-let connectServer = servers.DropDownItems.Add("&Connect")
-let editServers = servers.DropDownItems.Add("&Edit")
-let deleteServers = servers.DropDownItems.Add("&Delete")
+let connectServer = servers.DropDownItems.Add "&Connect"
+let editServers = servers.DropDownItems.Add "&Edit"
+let deleteServers = servers.DropDownItems.Add "&Delete"
 
-let hosts = new ToolStripMenuItem("&Hosts")
-let openHosts = hosts.DropDownItems.Add("&Open")
-let changeHosts = hosts.DropDownItems.Add("&Change")
-let cmdKeys = new ToolStripMenuItem("&CmdKey")
-let listCmdKey = cmdKeys.DropDownItems.Add("&List")
-let purgeCmdKey = cmdKeys.DropDownItems.Add("&Purge")
-let addCmdKey = cmdKeys.DropDownItems.Add("&Add")
+let hosts = new ToolStripMenuItem "&Hosts"
+let openHosts = hosts.DropDownItems.Add "&Open"
+let changeHosts = hosts.DropDownItems.Add "&Change"
+let cmdKeys = new ToolStripMenuItem "&CmdKey"
+let listCmdKey = cmdKeys.DropDownItems.Add "&List"
+let purgeCmdKey = cmdKeys.DropDownItems.Add "&Purge"
+let addCmdKey = cmdKeys.DropDownItems.Add "&Add"
 
 openHosts.Click.Add(fun _ -> Utils.viewHosts ())
 let mutable hostEntries = Hosts.readHostEntries ()
@@ -107,33 +107,33 @@ let watch =
 type AccountEdit(host) as x =
     class
         inherit Form()
-        let accept = new Button(DialogResult = DialogResult.OK, Text = "OK")
-        let cancel = new Button(DialogResult = DialogResult.Cancel, Text = "Cancel")
-        let host = new TextBox(Text = host)
-        let user = new TextBox(Text = System.Environment.UserName)
-        let pass = new TextBox(PasswordChar = '*')
+        let buttons = new WinForms.DialogButtons(x)
+        let host = new TextBox(Text = host, Width = 200)
+        let user = new TextBox(Text = System.Environment.UserName, Width = 200)
+        let pass = new TextBox(PasswordChar = '*', Width = 200)
 
         do
+            x.Text <- "Account"
             x.StartPosition <- FormStartPosition.CenterParent
             x.FormBorderStyle <- FormBorderStyle.FixedDialog
-            x.AcceptButton <- accept
-            x.CancelButton <- cancel
+          
             let flow = new FlowLayoutPanel()
+            flow.AutoSizeMode <- AutoSizeMode.GrowAndShrink
+            flow.AutoSize <- true
+            flow.MaximumSize <- System.Drawing.Size(300, 0)
             flow.Dock <- DockStyle.Fill
-
             flow.Controls.Add(new Label(Text = "Host:"))
-            flow.Controls.Add(host)
+            flow.Controls.Add host
 
             flow.Controls.Add(new Label(Text = "User:"))
-            flow.Controls.Add(user)
+            flow.Controls.Add user
 
             flow.Controls.Add(new Label(Text = "Pass:"))
-            flow.Controls.Add(pass)
-
-            flow.Controls.Add(accept)
-            flow.Controls.Add(cancel)
-
-            x.Controls.Add(flow)
+            flow.Controls.Add pass
+          
+            flow.Controls.Add buttons
+            x.Controls.Add flow
+            x.ClientSize <- flow.PreferredSize
 
         member x.Edit() = x.ShowDialog() = DialogResult.OK
         member x.User = user.Text
@@ -143,41 +143,32 @@ type AccountEdit(host) as x =
 type ConnectionEdit() as x =
     class
         inherit Form()
-        let accept = new Button(DialogResult = DialogResult.OK, Text = "OK")
-        let cancel = new Button(DialogResult = DialogResult.Cancel, Text = "Cancel")
+        let buttons = new WinForms.DialogButtons(x)
         let name = new TextBox(Width = 200)
         let host = new TextBox(Width = 200)
-        let port = new TextBox()
+        let port = new TextBox(Width = 200)
 
         do
+            x.Text <- "Host"
             x.StartPosition <- FormStartPosition.CenterParent
             x.FormBorderStyle <- FormBorderStyle.FixedDialog
-            x.AcceptButton <- accept
-            x.CancelButton <- cancel
+        
             let flow = new FlowLayoutPanel()
+            flow.AutoSizeMode <- AutoSizeMode.GrowAndShrink
+            flow.AutoSize <- true
             flow.Dock <- DockStyle.Fill
-
-
+            flow.MaximumSize <- System.Drawing.Size(300, 0)
             flow.Controls.Add(new Label(Text = "Name:"))
             flow.Controls.Add name
             flow.Controls.Add(new Label(Text = "Host:"))
             flow.Controls.Add host
             flow.Controls.Add(new Label(Text = "Port:"))
             flow.Controls.Add port
-            let panel = new FlowLayoutPanel()
-            panel.WrapContents <- false
-            panel.FlowDirection <- FlowDirection.RightToLeft
-            panel.Dock <- DockStyle.Fill
-            panel.BackColor <- System.Drawing.Color.Red
-            panel.Controls.Add accept
-            panel.Controls.Add cancel
-            flow.Controls.Add panel
-            cancel.Anchor <- AnchorStyles.Right
-            accept.Anchor <- AnchorStyles.Right
+            flow.Controls.Add buttons
 
-            x.Controls.Add(flow)
-            panel.AutoSize <- true
-            panel.AutoSizeMode <- AutoSizeMode.GrowAndShrink
+            x.Controls.Add flow
+            x.ClientSize <- flow.PreferredSize
+
 
         member x.Name
             with get () = name.Text.Trim()

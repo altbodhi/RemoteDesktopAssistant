@@ -1,8 +1,8 @@
 <?xml version="1.0" standalone="yes"?>
 <DocumentElement>
   <rdp>
-    <Name>Домашний компьютер</Name>
-    <Host>home-pc</Host>
+    <Name>Домашний</Name>
+    <Host>robot</Host>
     <Port>3389</Port>
   </rdp>
 </DocumentElement>

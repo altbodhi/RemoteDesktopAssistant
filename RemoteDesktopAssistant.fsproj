@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup><Compile Include="WinForms.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
