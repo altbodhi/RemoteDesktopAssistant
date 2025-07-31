@@ -1,4 +1,4 @@
-module RemoteDesktopAssistant.WinForms
+namespace RemoteDesktopAssistant.WinForms
 
 open System.Windows.Forms
 
