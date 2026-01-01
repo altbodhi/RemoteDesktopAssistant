@@ -10,11 +10,11 @@ and provides a maximally convenient way to save credentials and settings
 local dns records (% windir %/system32/drivers/etc/hosts)
 
 build instruction:
-    1. check installed NET SDK 9
+    1. check installed NET SDK 10
     2. clone this repo
     3. open console in repo folder
     4. run `dotnet build -c release`
-    5. after build if bin\release\net9.0-windows you find exe-file
+    5. after build if bin\release\net10.0-windows you find exe-file
     6. start it and enjoy!
 
 example: 
@@ -27,3 +27,14 @@ and every time rdp request password when
     4. test menu item Servers/Connect
 
 hint: rdp toggle fullscrean hostkeys CTRL+ALT+BREAK
+
+2026-01-01:
+
+add vpn menu (connect, disconnect, soft kill)
+first argument is path to executable client file
+second argumnet is a command for menu option
+
+you can see actual command key in pwsh via & 'C:\Program Files\OpenVPN\bin\openvpn-gui.exe' --help
+after click OK value save to config.json in application folder.
+
+Good luck!
