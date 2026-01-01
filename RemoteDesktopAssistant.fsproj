@@ -5,9 +5,15 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
-  <ItemGroup><Compile Include="WinForms.fs" />
+  
+  <ItemGroup>
+    <Compile Include="Init.fs" />
     <Compile Include="Utils.fs" />
+    <Compile Include="OpenVpnGUI.fs" />
+    <Compile Include="WinForms.fs" />
+    <Compile Include="VpnUI.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

@@ -94,3 +94,8 @@ module FileWatch =
 
             fsw.EnableRaisingEvents <- true
             fsw :> System.IDisposable
+
+module App =
+    open System.Drawing
+    open System.Reflection
+    let icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)

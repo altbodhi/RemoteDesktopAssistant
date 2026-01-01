@@ -70,6 +70,7 @@ type MainMenu() as x =
             x.Items.Add servers |> ignore
             x.Items.Add hosts |> ignore
             x.Items.Add cmdKeys |> ignore
+            x.Items.Add VpnUI.vpnActions |> ignore
     end
 
 type ConnectionsGrid() as x =
@@ -244,6 +245,7 @@ type RdpConnections() as x =
         inherit Form()
 
         do
+            x.Icon <- App.icon
             x.Text <- "RDP Assistant"
             x.StartPosition <- FormStartPosition.CenterScreen
             x.Height <- 600

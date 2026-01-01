@@ -20,3 +20,4 @@ type DialogButtons(dialog: Form) as x =
             dialog.AcceptButton <- accept
             dialog.CancelButton <- cancel
     end
+
