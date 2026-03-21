@@ -29,12 +29,21 @@ let dataRowToRemoteHost (row: DataRow) =
       port = port }
 
 let db = new DataTable("rdp")
-db.Columns.AddRange([| new DataColumn("Name"); new DataColumn("Host"); new DataColumn("Port") |])
+
+db.Columns.AddRange(
+    [| new DataColumn("Name")
+       new DataColumn("Host")
+       new DataColumn("Port") |]
+)
 
 if File.Exists("db.xml") then
     db.ReadXml("db.xml") |> ignore
 else
-    db.Rows.Add([| "Домашний компьютер" :> obj; "home-pc" :> obj; 3389us :> obj |])
+    db.Rows.Add(
+        [| "Домашний компьютер" :> obj
+           "home-pc" :> obj
+           3389us :> obj |]
+    )
     |> ignore
 
 let servers = new ToolStripMenuItem "&Server"
@@ -56,7 +65,8 @@ openHosts.Click.Add(fun _ -> Utils.viewHosts ())
 let mutable hostEntries = Hosts.readHostEntries ()
 
 let chekHost host =
-    hostEntries |> Array.exists (fun h -> h.host = host.host)
+    hostEntries
+    |> Array.exists (fun h -> h.host = host.host)
 
 changeHosts.Click.Add(fun _ -> Utils.changeHosts ())
 
@@ -82,7 +92,7 @@ type ConnectionsGrid() as x =
             x.AllowUserToAddRows <- false
             x.AllowUserToDeleteRows <- false
 
-            x.CellFormatting.Add(fun e ->
+            x.CellFormatting.Add (fun e ->
                 if e.RowIndex > x.Rows.Count then
                     ()
                 else
@@ -110,14 +120,18 @@ type AccountEdit(host) as x =
         inherit Form()
         let buttons = new WinForms.DialogButtons(x)
         let host = new TextBox(Text = host, Width = 200)
-        let user = new TextBox(Text = System.Environment.UserName, Width = 200)
-        let pass = new TextBox(PasswordChar = '*', Width = 200)
+
+        let user =
+            new TextBox(Text = System.Environment.UserName, Width = 200)
+
+        let pass =
+            new TextBox(PasswordChar = '*', Width = 200)
 
         do
             x.Text <- "Account"
             x.StartPosition <- FormStartPosition.CenterParent
             x.FormBorderStyle <- FormBorderStyle.FixedDialog
-          
+
             let flow = new FlowLayoutPanel()
             flow.AutoSizeMode <- AutoSizeMode.GrowAndShrink
             flow.AutoSize <- true
@@ -131,7 +145,7 @@ type AccountEdit(host) as x =
 
             flow.Controls.Add(new Label(Text = "Pass:"))
             flow.Controls.Add pass
-          
+
             flow.Controls.Add buttons
             x.Controls.Add flow
             x.ClientSize <- flow.PreferredSize
@@ -153,7 +167,7 @@ type ConnectionEdit() as x =
             x.Text <- "Host"
             x.StartPosition <- FormStartPosition.CenterParent
             x.FormBorderStyle <- FormBorderStyle.FixedDialog
-        
+
             let flow = new FlowLayoutPanel()
             flow.AutoSizeMode <- AutoSizeMode.GrowAndShrink
             flow.AutoSize <- true
@@ -187,8 +201,8 @@ type ConnectionEdit() as x =
             and set (value: uint16) = port.Text <- $"{value}"
 
         member x.Edit() = x.ShowDialog() = DialogResult.OK
-
     end
+
 
 let current () =
     match grid.CurrentRow with
@@ -204,7 +218,7 @@ let show (text: string) =
 let question text =
     MessageBox.Show(text, "Rdp Assistant", buttons = MessageBoxButtons.YesNo) = DialogResult.Yes
 
-deleteServers.Click.Add(fun _ ->
+deleteServers.Click.Add (fun _ ->
     match current () with
     | None -> ()
     | Some r ->
@@ -214,17 +228,26 @@ deleteServers.Click.Add(fun _ ->
             db.Rows.Remove r
             grid.Refresh())
 
-connectServer.Click.Add(fun _ ->
+connectServer.Click.Add (fun _ ->
     match current () with
     | None -> ()
-    | Some v -> v |> dataRowToRemoteHost |> WinProcess.startConnect |> ignore)
+    | Some v ->
+        v
+        |> dataRowToRemoteHost
+        |> WinProcess.startConnect
+        |> ignore)
 
-listCmdKey.Click.Add(fun _ ->
+listCmdKey.Click.Add (fun _ ->
     match current () with
     | None -> ()
-    | Some v -> v |> dataRowToRemoteHost |> (fun x -> x.host) |> Utils.listCmdKey |> ignore)
+    | Some v ->
+        v
+        |> dataRowToRemoteHost
+        |> (fun x -> x.host)
+        |> Utils.listCmdKey
+        |> ignore)
 
-purgeCmdKey.Click.Add(fun _ ->
+purgeCmdKey.Click.Add (fun _ ->
     match current () with
     | None -> ()
     | Some v ->
@@ -257,7 +280,7 @@ type RdpConnections() as x =
 
 let mainForm = new RdpConnections()
 
-addCmdKey.Click.Add(fun _ ->
+addCmdKey.Click.Add (fun _ ->
     match current () with
     | None -> ()
     | Some v ->
@@ -269,19 +292,18 @@ addCmdKey.Click.Add(fun _ ->
             if acc.Edit() then
                 Utils.addCmdKey x.host acc.User acc.Pass |> ignore)
 
-addServers.Click.Add(fun e ->
+addServers.Click.Add (fun e ->
     use connectionEdit = new ConnectionEdit()
 
     if connectionEdit.Edit() then
-        db.Rows.Add
-            [| connectionEdit.Name :> obj
-               connectionEdit.Host :> obj
-               connectionEdit.Port :> obj |]
+        db.Rows.Add [| connectionEdit.Name :> obj
+                       connectionEdit.Host :> obj
+                       connectionEdit.Port :> obj |]
         |> ignore
 
         grid.Refresh())
 
-editServers.Click.Add(fun e ->
+editServers.Click.Add (fun e ->
     match current () with
     | None -> ()
     | Some dr ->
@@ -292,11 +314,28 @@ editServers.Click.Add(fun e ->
 
         if edit.Edit() then
             dr.BeginEdit()
-            dr.Item "Name" <- edit.Name
-            dr.Item "Host" <- edit.Host
-            dr.Item "Port" <- edit.Port
+            dr.Item"Name" <- edit.Name
+            dr.Item"Host" <- edit.Host
+            dr.Item"Port" <- edit.Port
             dr.EndEdit()
             grid.Refresh())
+
+let closeVPN () =
+    let cfg = Init.read ()
+    let ps = OpenVpnGUI.disConnect cfg.VpnDisconnect
+
+    match ps with
+    | NonNull x ->
+        System.Console.Beep(880, 500)
+        if WinProcess.minimizeAll () then 
+            System.Threading.Thread.Sleep 100
+        else ()
+
+        WinProcess.bringToFront x
+        |> System.Console.WriteLine
+
+        x.WaitForExit()
+    | Null -> ()
 
 [<System.STAThreadAttribute>]
 [<EntryPoint>]
@@ -304,4 +343,5 @@ let main args =
     Application.Run mainForm
     watch.Dispose()
     db.WriteXml "db.xml"
+    closeVPN ()
     0

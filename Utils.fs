@@ -30,7 +30,34 @@ module Hosts =
 module WinProcess =
     open System.Diagnostics
     open RemoteCore
+    open System
+    open System.Runtime.InteropServices
+    open System.Reflection
+    
+    [<DllImportAttribute("user32.dll")>]
+    extern bool SetForegroundWindow (IntPtr hWnd)
+    
+    [<DllImportAttribute("user32.dll")>]
+    extern IntPtr SetActiveWindow(IntPtr hWnd)
 
+    [<DllImportAttribute("user32.dll")>]
+    extern bool ShowWindow(IntPtr hWnd,uint state)
+
+    let minimizeAll () =
+        let tShell = Type.GetTypeFromProgID("Shell.Application")
+        match tShell with
+        | NonNull t ->
+            let oShell = Activator.CreateInstance t
+            let r = t.InvokeMember("MinimizeAll", BindingFlags.InvokeMethod, null,oShell,null  )
+            match r with | NonNull _ -> true | Null -> false
+        | Null -> false
+
+    let bringToFront (ps:Process) = 
+        ps.Refresh()
+        Console.WriteLine ps.MainWindowTitle
+        ShowWindow (ps.MainWindowHandle, 9u) |> ignore
+        SetForegroundWindow ps.MainWindowHandle 
+    
     let start executable arguments runas =
         let si = ProcessStartInfo()
         si.Arguments <- arguments
